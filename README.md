@@ -1,4 +1,4 @@
-## 📝 Notes
+## About the Application Tech Stack
 
 - This project is an **AI-powered ecommerce gaming application** built with **React Native** (frontend) and **Django with Python** (backend).
 - An integrated AI recommendation system that analyzes the user behavior, preferences, and interaction history to deliver **personalized game and product suggestions**.
