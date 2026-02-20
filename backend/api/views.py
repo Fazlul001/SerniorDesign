@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .simple_account_checker import check_credentials, find_user_by_email
 from .simple_account_creator import create_account
 
+# test
 
 def hello(request):
     return JsonResponse({"message": "Hello World"})
