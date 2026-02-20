@@ -99,3 +99,6 @@ def register(request, user_info):
             "last": last,
         }
     )
+
+def aichat_recomendation(query: str):
+    return JsonResponse({"message": "{query}"})
