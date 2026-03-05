@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from typing import Optional
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 MONGO_URI  = os.getenv("MONGO_URI")
 DB_NAME    = os.getenv("DB_NAME", "test")

@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from typing import Optional
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 # ── Config (all secrets from .env, never hardcoded) ──────────────────────────
 MONGO_URI   = os.getenv("MONGO_URI")
