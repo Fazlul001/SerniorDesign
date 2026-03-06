@@ -98,3 +98,8 @@ def register(request, user_info):
             "last": last,
         }
     )
+
+
+# Order Logic to retrieve order info and get functions from simple_order_creator.py and simple_order_checker.py
+def orders(request):
+    return JsonResponse({"message": "Orders endpoint - not implemented yet"})
