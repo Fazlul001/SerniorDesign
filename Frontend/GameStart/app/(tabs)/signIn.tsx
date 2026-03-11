@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { router } from "expo-router";
-import { useAuth } from "./context/AuthContext"; // ⬅️ check this path
+import { useAuth } from "../../context/AuthContext"; // ⬅️ check this path
 import {
   View,
   Text,
