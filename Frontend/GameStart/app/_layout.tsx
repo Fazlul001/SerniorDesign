@@ -9,7 +9,8 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 // ⬅️ NEW: import your AuthProvider
-import { AuthProvider } from './(tabs)/context/AuthContext';
+import { AuthProvider } from '../context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -24,6 +25,7 @@ export default function RootLayout() {
 
   return (
     // 🔹 Wrap the whole app in AuthProvider so useAuth() works everywhere
+    <CartProvider>
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
@@ -34,5 +36,6 @@ export default function RootLayout() {
         <StatusBar style="auto" />
       </ThemeProvider>
     </AuthProvider>
+    </CartProvider>
   );
 }
