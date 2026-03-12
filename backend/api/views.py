@@ -1,10 +1,16 @@
 from pydoc import doc
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+import os
+import json
+import traceback
+from groq import Groq
 
 from .simple_account_checker import check_credentials, find_user_by_email
 from .simple_account_creator import create_account
-from .simple_account_checker import check_credentials, find_user_by_email, decrypt
+
+# Groq client
+client = Groq(api_key=os.environ.get("GROQ_API_KEY", "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"))
 
 def hello(request):
     return JsonResponse({"message": "Hello World"})
@@ -100,7 +106,75 @@ def register(request, user_info):
         }
     )
 
+@csrf_exempt
+def aichat_recommendation(request):
+    """
+    AI chat recommendations using Groq API
+    POST /com.gamestart/v1/ai/recommendation
+    
+    Expected JSON body:
+    {
+        "query": "user question or prompt",
+        "model": "llama-3.3-70b-versatile" (optional, defaults to llama-3.3-70b-versatile)
+    }
+    """
+    if request.method != "POST":
+        return JsonResponse({"error": "Only POST method is allowed"}, status=405)
+    
+    try:
+        body = json.loads(request.body)
+        query = body.get("query")
+        model = body.get("model", "llama-3.3-70b-versatile")
+        
+        if not query:
+            return JsonResponse({"error": "Query parameter is required"}, status=400)
+        
+        print(f"Processing Groq AI query: {query}")
+        
+        # Call Groq API
+        message = client.chat.completions.create(
+            model=model,
+            max_tokens=1024,
+            messages=[
+                {"role": "user", "content": query}
+            ]
+        )
+        
+        response_text = message.choices[0].message.content
+        
+        return JsonResponse({
+            "success": True,
+            "query": query,
+            "response": response_text,
+            "model": model
+        })
+        
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON in request body"}, status=400)
+    except Exception as e:
+        return JsonResponse({
+            "error": "Failed to process Groq request",
+            "details": str(e),
+            "traceback": traceback.format_exc()
+        }, status=500)
 
-# Order Logic to retrieve order info and get functions from simple_order_creator.py and simple_order_checker.py
-def orders(request):
-    return JsonResponse({"message": "Orders endpoint - not implemented yet"})
+
+@csrf_exempt
+def list_groq_models(request):
+    """
+    Lists all available Groq models
+    GET /com.gamestart/v1/ai/models
+    """
+    try:
+        models = client.models.list()
+        model_list = [{"id": model.id, "name": model.name if hasattr(model, 'name') else model.id} 
+                      for model in models.data]
+        return JsonResponse({
+            "success": True,
+            "models": model_list
+        })
+    except Exception as e:
+        return JsonResponse({
+            "error": "Failed to list models",
+            "details": str(e)
+        }, status=500)
