@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
 
+
 # ── Config (all secrets from .env, never hardcoded) ──────────────────────────
 MONGO_URI   = os.getenv("MONGO_URI")
 DB_NAME     = os.getenv("DB_NAME", "test")
@@ -19,6 +20,9 @@ if not MONGO_URI or not FERNET_KEY:
     raise EnvironmentError("Missing MONGO_URI or ENCRYPTION_KEY in .env")
 
 _fernet = Fernet(FERNET_KEY.encode())
+
+print(f"FERNET_KEY: {FERNET_KEY}")
+print(f"_fernet: {_fernet}")
 
 # ── Encryption helpers (reversible — used for email/name) ────────────────────
 def encrypt(value: str) -> str:

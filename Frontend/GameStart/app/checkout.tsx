@@ -10,7 +10,9 @@ import {
   ScrollView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useAuth } from './(tabs)/context/AuthContext'; 
+import { useAuth } from '../context/AuthContext'; 
+import { useCart } from '../context/CartContext';
+import { FlatList } from 'react-native';
 
 const DARK_BG = '#000000ff';
 const CARD_BG = '#101827';
@@ -18,6 +20,7 @@ const ACCENT = '#22c1dc';
 const TEXT_PRIMARY = '#e5f2ff';
 const TEXT_SECONDARY = '#9ca3af';
 const BORDER = '#1f2937';
+
 
 export default function CheckoutScreen() {
   const { user } = useAuth(); 
@@ -51,10 +54,14 @@ export default function CheckoutScreen() {
   }
 
   // read total from route params
-  const { total } = useLocalSearchParams<{ total?: string }>();
+  // const { total } = useLocalSearchParams<{ total?: string }>();
 
-  const numericTotal = total ? parseFloat(total) : 0;
+  const { items } = useCart(); // STORES All items info from cart page
+  const total = items.reduce(
+  (sum, item) => sum + item.price * item.quantity, 0);
+  const numericTotal = total;
   const displayTotal = numericTotal.toFixed(2);
+
   const [method, setMethod] = useState<'credit' | 'debit'>('credit');
 
   return (
@@ -70,8 +77,9 @@ export default function CheckoutScreen() {
         style={styles.container}
         contentContainerStyle={{ paddingBottom: 40 }}
       >
+        // OLD Code
         {/* Order summary */}
-        <View style={styles.section}>
+        {/* <View style={styles.section}>
           <Text style={styles.sectionTitle}>Order Summary</Text>
           <View style={styles.summaryBox}>
             <View style={styles.summaryRow}>
@@ -79,7 +87,38 @@ export default function CheckoutScreen() {
               <Text style={styles.summaryTotalPrice}>${displayTotal}</Text>
             </View>
           </View>
+        </View> */}
+        <View style={styles.section}>
+      <Text style={styles.sectionTitle}>Order Summary</Text>
+
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id.toString()}
+          scrollEnabled={false}
+            renderItem={({ item }) => (
+            <View style={styles.summaryItem}>
+              <View>
+                <Text style={styles.name}>{item.name}</Text>
+                  <Text style={styles.itemQty}>
+                  Quantity: {item.quantity}
+                </Text>
+              </View>
+
+              <Text style={styles.price}>
+                ${(item.price * item.quantity).toFixed(2)}
+              </Text>
+            </View>
+            )}
+          />
+
+          <View style={styles.summaryTotalRow}>
+            <Text style={styles.summaryTotalLabel}>Total</Text>
+            <Text style={styles.summaryTotalPrice}>
+              ${total.toFixed(2)}
+            </Text>
+          </View>
         </View>
+        
 
         {/* Payment method */}
         <View style={styles.section}>
@@ -346,4 +385,37 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 16,
   },
+  summaryItem: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+  backgroundColor: CARD_BG,
+  padding: 12,
+  borderRadius: 10,
+  marginBottom: 8,
+  borderWidth: 1,
+  borderColor: BORDER,
+},
+itemQty: {
+  color: TEXT_SECONDARY,
+  marginTop: 4,
+},
+
+summaryTotalRow: {
+  marginTop: 12,
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  borderTopWidth: 1,
+  borderTopColor: BORDER,
+  paddingTop: 10,
+},
+price: { 
+  color: TEXT_PRIMARY, 
+  fontSize: 16, 
+  fontWeight: "bold", 
+},
+name: { 
+  color: TEXT_PRIMARY, 
+  fontSize: 16, 
+},
 });
