@@ -55,7 +55,7 @@ def login(request, user_identifier):
             "last": last,
         }
     )
-
+# test
 
 @csrf_exempt
 def register(request, user_info):
