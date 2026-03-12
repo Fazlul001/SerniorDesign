@@ -1,9 +1,10 @@
+from pydoc import doc
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .simple_account_checker import check_credentials, find_user_by_email
 from .simple_account_creator import create_account
-
+from .simple_account_checker import check_credentials, find_user_by_email, decrypt
 
 def hello(request):
     return JsonResponse({"message": "Hello World"})
@@ -32,8 +33,8 @@ def login(request, user_identifier):
             print(f"User {email} authenticated successfully.")
             # 🔹 get full user doc so we can return names
             doc = find_user_by_email(email)
-            first = doc.get("FirstName") if doc else ""
-            last = doc.get("LastName") if doc else ""
+            first = decrypt(doc.get("FirstName")) if doc else ""
+            last = decrypt(doc.get("LastName")) if doc else ""
         else:
             print(f"Authentication failed for user {email}.")
             first = ""
