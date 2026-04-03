@@ -1,6 +1,17 @@
-import React from 'react';
-import {SafeAreaView, View, Text, StyleSheet, FlatList, TouchableOpacity} from 'react-native';
+// app/(tabs)/cart.tsx
+
+import React, { useState } from 'react';
+import {
+  SafeAreaView,
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from 'react-native';
+import { router } from 'expo-router';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext'; 
 
 const DARK_BG = '#000000ff';
 const CARD_BG = '#101827';
@@ -11,6 +22,8 @@ const BORDER = '#1f2937';
 
 const CartScreen = () => {
   const { items, removeFromCart, setQuantity, clearCart } = useCart();
+  const { user } = useAuth(); 
+  const [authError, setAuthError] = useState<string | null>(null); 
 
   const total = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -25,19 +38,20 @@ const CartScreen = () => {
           ${item.price.toFixed(2)} x {item.quantity}
         </Text>
       </View>
+
       <View style={styles.qtyRow}>
         <TouchableOpacity
-          onPress={() =>
-            setQuantity(item.id, Math.max(1, item.quantity - 1))
-          }
+          onPress={() => setQuantity(item.id, Math.max(1, item.quantity - 1))}
         >
           <Text style={styles.qtyButton}>-</Text>
         </TouchableOpacity>
+
         <TouchableOpacity
           onPress={() => setQuantity(item.id, item.quantity + 1)}
         >
           <Text style={styles.qtyButton}>+</Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => removeFromCart(item.id)}>
           <Text style={styles.removeText}>Remove</Text>
         </TouchableOpacity>
@@ -69,16 +83,41 @@ const CartScreen = () => {
           <>
             <FlatList
               data={items}
-              keyExtractor={item => item.id.toString()}
+              keyExtractor={(item) => item.id.toString()}
               renderItem={renderItem}
               contentContainerStyle={{ paddingVertical: 10 }}
             />
+
+            {/* will show the error */}
+            {authError && <Text style={styles.authError}>{authError}</Text>}
+
+            {/* Footer with total and checkout */}
             <View style={styles.footer}>
               <Text style={styles.totalText}>
                 Total: ${total.toFixed(2)}
               </Text>
+
               <TouchableOpacity onPress={clearCart}>
                 <Text style={styles.clearText}>Clear cart</Text>
+              </TouchableOpacity>
+
+              {/* will send total checkout*/}
+              <TouchableOpacity
+                style={styles.checkoutButton}
+                onPress={() => {
+                  if (!user) {
+                    setAuthError('Must be signed in');
+                    return;
+                  }
+
+                  setAuthError(null);
+                  router.push({
+                    pathname: '/checkout',
+                    params: { total: total.toString() },
+                  });
+                }}
+              >
+                <Text style={styles.checkoutText}>Checkout</Text>
               </TouchableOpacity>
             </View>
           </>
@@ -87,6 +126,8 @@ const CartScreen = () => {
     </SafeAreaView>
   );
 };
+
+export default CartScreen;
 
 const styles = StyleSheet.create({
   safe: {
@@ -137,6 +178,7 @@ const styles = StyleSheet.create({
     color: TEXT_SECONDARY,
     textAlign: 'center',
   },
+
   cartItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,6 +198,7 @@ const styles = StyleSheet.create({
     color: TEXT_SECONDARY,
     marginTop: 4,
   },
+
   qtyRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -167,13 +210,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 6,
-    overflow: 'hidden',
     fontWeight: '700',
   },
   removeText: {
     color: '#f97373',
     marginLeft: 8,
   },
+
   footer: {
     borderTopWidth: 1,
     borderTopColor: BORDER,
@@ -181,6 +224,7 @@ const styles = StyleSheet.create({
     marginTop: 6,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
   totalText: {
     color: TEXT_PRIMARY,
@@ -191,6 +235,25 @@ const styles = StyleSheet.create({
     color: ACCENT,
     fontWeight: '600',
   },
-});
 
-export default CartScreen;
+  checkoutButton: {
+    backgroundColor: ACCENT,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    marginLeft: 10,
+  },
+  checkoutText: {
+    color: DARK_BG,
+    fontWeight: '700',
+    fontSize: 16,
+  },
+
+  //Auth error fixer
+  authError: {
+    color: '#f97373',
+    fontWeight: '700',
+    marginTop: 6,
+    marginBottom: 6,
+  },
+});
