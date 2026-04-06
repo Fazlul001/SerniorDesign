@@ -60,18 +60,32 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      // FUTURE: Replace this with API call
-      const reply = fallbackReply(text);
+      // Send query to backend AI endpoint
+      const response = await fetch('http://127.0.0.1:8000/com.gamestart/v1/ai/recommendation', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          query: text,
+          model: 'llama-3.3-70b-versatile',
+        }),
+      });
 
-      // Fake delay so it feels like real AI response
-      setTimeout(() => {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: reply },
-        ]);
-        setLoading(false);
-      }, 500);
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const reply = data.response || 'No response from AI';
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: reply },
+      ]);
+      setLoading(false);
     } catch (error) {
+      console.error('Chat error:', error);
       // Fallback error message
       setMessages((prev) => [
         ...prev,
