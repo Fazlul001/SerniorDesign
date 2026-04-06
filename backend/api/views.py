@@ -178,3 +178,4 @@ def list_groq_models(request):
             "error": "Failed to list models",
             "details": str(e)
         }, status=500)
+
