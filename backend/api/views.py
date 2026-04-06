@@ -10,7 +10,7 @@ from .simple_account_checker import check_credentials, find_user_by_email
 from .simple_account_creator import create_account
 
 # Groq client
-client = Groq(api_key=os.environ.get("GROQ_API_KEY", "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"))
+client = Groq(api_key=os.environ.get("GROQ_API_KEY", "ASK FOR KEY"))
 
 def hello(request):
     return JsonResponse({"message": "Hello World"})
